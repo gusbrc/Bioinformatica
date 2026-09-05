@@ -60,7 +60,7 @@ if arquivo is not None:
             for RNA in df["entrada"]:
                 status, pre_mRNA = validar_sequencia(str(RNA))
                 status_list.append(status)
-                pre_mrna_list.append(pre_mRNA.replace('T', 'U') if pre_mRNA else "")
+                pre_mrna_list.append(pre_mRNA if pre_mRNA else "")
 
             resultado = df.copy()
             resultado["status"] = status_list

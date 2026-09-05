@@ -6,12 +6,10 @@ def validar_sequencia(RNA):
     flag4 = (tam % 3 == 0) #Teste para o caso 5
     flag5 = True
 
-    erros = []
     i = 0
     for base in RNA:
         #Teste para o CASO 2:
         if base not in ['A', 'T', 'C', 'G']:
-            erros.append((i, i + 1, 'inválido'))
             flag1 = False
 
         #Teste para o CASO 3:
@@ -26,20 +24,19 @@ def validar_sequencia(RNA):
             if RNA[i-2:i+1] in ['TAA', 'TAG', 'TGA'] and (i - 2) % 3 == 0:
                 flag3 = True
                 if i + 1 < tam:
-                    erros.append((i - 2, i + 1, 'nonsense / STOP prematuro'))
                     flag5 = False
         i += 1
 
     if flag1 and flag2 and flag3 and flag4 and flag5:
-        return 'CORRETO', RNA[start:tam], None
+        return 'CORRETO', RNA[start:tam].replace('T', 'U')
     elif not flag1:
-        return 'BUG - base inválida', None, erros
+        return 'BUG - base inválida', None
     elif not flag2:
-        return 'BUG - START ausente', None, None #Não há o que destacar, porque o ATG é ausente
+        return 'BUG - START ausente', None
     elif not flag4:
-        return 'BUG - frameshift', None, [(tam - (tam % 3), tam, 'frameshift')]
+        return 'BUG - frameshift', None
     elif not flag3:
-        return 'BUG - STOP ausente', None, None #Não há o que destacar, porque o fim é ausente
+        return 'BUG - STOP ausente', None
     elif not flag5:
-        return 'BUG - nonsense / STOP prematuro', None, erros
+        return 'BUG - nonsense / STOP prematuro', None
     
