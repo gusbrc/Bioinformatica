@@ -16,37 +16,36 @@ if formato == "CSV":
         "sequências de RNA a serem validadas."
     )
     arquivo = st.file_uploader("Arquivo CSV", type=["csv"])
- 
+
     if arquivo is not None:
         try:
             df = pd.read_csv(arquivo, encoding="utf-8-sig")
         except Exception as e:
             st.error(f"Não foi possível ler o CSV: {e}")
             df = None
-            
+
 else:
     st.markdown(
         "Envie um arquivo TXT contendo **uma sequência de RNA por linha**, "
         "sem cabeçalho."
     )
     arquivo = st.file_uploader("Arquivo TXT", type=["txt"])
- 
+
     if arquivo is not None:
         try:
             conteudo = arquivo.read().decode("utf-8-sig")
         except Exception as e:
             st.error(f"Não foi possível ler o TXT: {e}")
             conteudo = None
- 
+
         if conteudo is not None:
             linhas = [linha.strip() for linha in conteudo.splitlines()]
             linhas = [linha for linha in linhas if linha]
- 
+
             if not linhas:
                 st.error("O TXT enviado está vazio ou não contém sequências válidas.")
             else:
                 df = pd.DataFrame({"entrada": linhas})
-
 
 
 if arquivo is not None:
@@ -74,10 +73,35 @@ if arquivo is not None:
             contagem.columns = ["status", "quantidade"]
             st.dataframe(contagem, use_container_width=True)
 
+            st.subheader("Relatório detalhado")
+            linhas_relatorio = []
+            for numero, (entrada, status, pre_mRNA) in enumerate(
+                zip(resultado["entrada"], status_list, pre_mrna_list), start=1
+            ):
+                linhas_relatorio.append(f"ENTRADA: {numero}")
+                linhas_relatorio.append(f"Sequência: {entrada}")
+                linhas_relatorio.append(f"STATUS: {status}")
+                linhas_relatorio.append(f"pré-mRNA: {pre_mRNA if pre_mRNA else 'NÃO GERADO'}")
+                linhas_relatorio.append("-" * 40)
+            st.code("\n".join(linhas_relatorio), language=None)
+
             csv_saida = resultado.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
                 "Baixar resultados em CSV",
                 data=csv_saida,
                 file_name="biocompiler_resultados.csv",
                 mime="text/csv",
+            )
+
+            linhas_txt = ["linha;status;resultado;pre_mRNA"]
+            for numero, (status, pre_mRNA) in enumerate(zip(status_list, pre_mrna_list), start=1):
+                status_ok_erro = "OK" if status == "CORRETO" else "ERRO"
+                pre = pre_mRNA if pre_mRNA else "NÃO GERADO"
+                linhas_txt.append(f"{numero};{status_ok_erro};{status};{pre}")
+            txt_saida = ("\n".join(linhas_txt) + "\n").encode("utf-8")
+            st.download_button(
+                "Baixar resultados.txt",
+                data=txt_saida,
+                file_name="resultados.txt",
+                mime="text/plain",
             )
