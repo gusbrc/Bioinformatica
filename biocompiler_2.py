@@ -26,10 +26,15 @@ def splicing(RNA):
 
     sitio_5 = -1
     sitio_3 = -1
+    ag_sem_gu = False
     cont_A = []
     for i in range(len(RNA) - 1):
         if RNA[i] == 'G' and RNA[i + 1] == 'U' and sitio_5 == -1:
             sitio_5 = i
+
+        # AG antes do primeiro GU: em "...AGU..." o GU pode ser falso (o G pertence ao AG).
+        if sitio_5 == -1 and RNA[i] == 'A' and RNA[i + 1] == 'G':
+            ag_sem_gu = True
 
         if sitio_5 != -1:
             if RNA[i] == 'A':
@@ -42,6 +47,8 @@ def splicing(RNA):
         return BUG_SITIO_5, None
 
     if sitio_3 == -1:
+        if ag_sem_gu:
+            return BUG_SITIO_5, None
         return BUG_SITIO_3, None
 
     branch = False
